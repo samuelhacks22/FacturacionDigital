@@ -11,7 +11,7 @@ class AuthSystem {
     // Inicializar usuarios por defecto si no existen
     if (this.users.length === 0) {
       this.users = [
-        { username: 'admin', password: 'admin123', name: 'Administrador' },
+        { username: 'robertico', password: 'robertico1415', name: 'Administrador' },
         { username: 'usuario', password: 'usuario123', name: 'Usuario' }
       ];
       this.saveUsers();
