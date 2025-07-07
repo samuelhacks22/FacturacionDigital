@@ -1,11 +1,28 @@
 // Sistema de exportación de facturas
 class ExportSystem {
   constructor() {
+    this.logoDataUrl = null;
     this.init();
   }
 
   init() {
     this.setupExportEvents();
+    this.loadLogo();
+  }
+
+  // Cargar logo como base64
+  async loadLogo() {
+    try {
+      const response = await fetch('assets/logo.svg');
+      const svgText = await response.text();
+      
+      // Convertir SVG a base64
+      const base64 = btoa(svgText);
+      this.logoDataUrl = `data:image/svg+xml;base64,${base64}`;
+    } catch (error) {
+      console.error('Error loading logo:', error);
+      this.logoDataUrl = null;
+    }
   }
 
   // Configurar eventos de exportación
@@ -36,26 +53,39 @@ class ExportSystem {
         return;
       }
 
-      // Preparar datos para Excel
-      const excelData = invoices.map(invoice => ({
-        'ID': invoice.id,
-        'Cliente': invoice.cliente,
-        'Email': invoice.email,
-        'Proyecto': invoice.proyecto,
-        'Niveles': invoice.niveles,
-        'Fecha Emisión': new Date(invoice.fechaEmision).toLocaleDateString(),
-        'Fecha Vencimiento': new Date(invoice.fechaVencimiento).toLocaleDateString(),
-        'Total (RD$)': invoice.total.toFixed(2),
-        'Servicios': invoice.servicios.map(s => `${s.tipo} - Nivel ${s.nivel} - ${s.area}m² - RD$${s.precio}`).join('; '),
-        'Documentos Requeridos': invoice.documentosRequeridos,
-        'Documentos a Entregar': invoice.documentosEntregar,
-        'Notas': invoice.notas,
-        'Fecha Creación': new Date(invoice.createdAt).toLocaleDateString()
-      }));
+      // Preparar datos para Excel con información de encabezado
+      const headerData = [
+        ['Sistema de Facturación Profesional'],
+        ['Diseño Sanitario y Eléctrico'],
+        [`Fecha de generación: ${new Date().toLocaleDateString()}`],
+        [`Total de facturas: ${invoices.length}`],
+        [''], // Fila vacía
+        ['ID', 'Cliente', 'Email', 'Proyecto', 'Niveles', 'Fecha Emisión', 'Fecha Vencimiento', 'Total (RD$)', 'Servicios', 'Documentos Requeridos', 'Documentos a Entregar', 'Notas', 'Fecha Creación']
+      ];
+
+      // Preparar datos de facturas
+      const invoiceData = invoices.map(invoice => [
+        invoice.id,
+        invoice.cliente,
+        invoice.email,
+        invoice.proyecto,
+        invoice.niveles,
+        new Date(invoice.fechaEmision).toLocaleDateString(),
+        new Date(invoice.fechaVencimiento).toLocaleDateString(),
+        invoice.total.toFixed(2),
+        invoice.servicios.map(s => `${s.tipo} - Nivel ${s.nivel} - ${s.area}m² - RD$${s.precio}`).join('; '),
+        invoice.documentosRequeridos,
+        invoice.documentosEntregar,
+        invoice.notas,
+        new Date(invoice.createdAt).toLocaleDateString()
+      ]);
+
+      // Combinar datos
+      const allData = [...headerData, ...invoiceData];
 
       // Crear libro de Excel
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelData);
+      const ws = XLSX.utils.aoa_to_sheet(allData);
 
       // Ajustar ancho de columnas
       const colWidths = [
@@ -74,6 +104,31 @@ class ExportSystem {
         { wch: 15 }  // Fecha Creación
       ];
       ws['!cols'] = colWidths;
+
+      // Estilo para el encabezado
+      if (ws['A1']) {
+        ws['A1'].s = {
+          font: { bold: true, sz: 16, color: { rgb: "333333" } },
+          fill: { fgColor: { rgb: "667eea" } }
+        };
+      }
+      if (ws['A2']) {
+        ws['A2'].s = {
+          font: { bold: true, sz: 12, color: { rgb: "666666" } }
+        };
+      }
+      
+      // Estilo para los encabezados de columnas (fila 6)
+      const headerRow = 6;
+      for (let col = 0; col < 13; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: headerRow - 1, c: col });
+        if (ws[cellAddress]) {
+          ws[cellAddress].s = {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "667eea" } }
+          };
+        }
+      }
 
       XLSX.utils.book_append_sheet(wb, ws, 'Facturas');
 
@@ -105,14 +160,23 @@ class ExportSystem {
       // Configurar fuente
       doc.setFont('helvetica', 'normal');
 
+      // Agregar logo si está disponible
+      if (this.logoDataUrl) {
+        try {
+          doc.addImage(this.logoDataUrl, 'SVG', 15, 10, 30, 20);
+        } catch (error) {
+          console.error('Error adding logo to PDF:', error);
+        }
+      }
+
       // Título
       doc.setFontSize(20);
-      doc.text('Sistema de Facturación Profesional', 20, 20);
+      doc.text('Sistema de Facturación Profesional', 50, 20);
       
       doc.setFontSize(12);
-      doc.text('Reporte de Facturas', 20, 30);
-      doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 20, 40);
-      doc.text(`Total de facturas: ${invoices.length}`, 20, 50);
+      doc.text('Reporte de Facturas', 50, 30);
+      doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 50, 40);
+      doc.text(`Total de facturas: ${invoices.length}`, 50, 50);
 
       // Preparar datos para la tabla
       const tableData = invoices.map(invoice => [
@@ -213,13 +277,22 @@ class ExportSystem {
       // Configurar fuente
       doc.setFont('helvetica', 'normal');
 
+      // Agregar logo si está disponible
+      if (this.logoDataUrl) {
+        try {
+          doc.addImage(this.logoDataUrl, 'SVG', 15, 10, 30, 20);
+        } catch (error) {
+          console.error('Error adding logo to individual PDF:', error);
+        }
+      }
+
       // Header
       doc.setFontSize(20);
-      doc.text('COTIZACIÓN', 20, 20);
+      doc.text('COTIZACIÓN', 50, 20);
       
       doc.setFontSize(12);
-      doc.text('Sistema de Facturación Profesional', 20, 30);
-      doc.text('Diseño Sanitario y Eléctrico', 20, 40);
+      doc.text('Sistema de Facturación Profesional', 50, 30);
+      doc.text('Diseño Sanitario y Eléctrico', 50, 40);
 
       // Información del cliente
       doc.setFontSize(14);

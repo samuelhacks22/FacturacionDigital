@@ -99,7 +99,16 @@ This is a professional invoicing system designed for sanitary and electrical des
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **July 07, 2025**: Added logo functionality to PDF and Excel exports
+  - Created professional SVG logo with building, electrical, and plumbing icons
+  - Integrated logo into PDF export headers for both general and individual invoices
+  - Enhanced Excel export with styled headers and company branding
+  - Added logo display in main application header
+
 ## Changelog
 
 Changelog:
 - July 07, 2025. Initial setup
+- July 07, 2025. Added logo integration for exports and UI branding

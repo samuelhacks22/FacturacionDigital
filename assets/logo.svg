@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="80" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="40" cy="40" r="35" fill="#667eea" stroke="#764ba2" stroke-width="2"/>
+  
+  <!-- Building icon -->
+  <rect x="25" y="50" width="30" height="20" fill="white" stroke="#667eea" stroke-width="1"/>
+  <rect x="30" y="45" width="20" height="25" fill="white" stroke="#667eea" stroke-width="1"/>
+  <rect x="35" y="40" width="10" height="30" fill="white" stroke="#667eea" stroke-width="1"/>
+  
+  <!-- Windows -->
+  <rect x="32" y="47" width="3" height="3" fill="#667eea"/>
+  <rect x="37" y="47" width="3" height="3" fill="#667eea"/>
+  <rect x="42" y="47" width="3" height="3" fill="#667eea"/>
+  <rect x="37" y="42" width="3" height="3" fill="#667eea"/>
+  <rect x="27" y="52" width="3" height="3" fill="#667eea"/>
+  <rect x="32" y="52" width="3" height="3" fill="#667eea"/>
+  <rect x="42" y="52" width="3" height="3" fill="#667eea"/>
+  <rect x="47" y="52" width="3" height="3" fill="#667eea"/>
+  
+  <!-- Electric bolt -->
+  <path d="M50 25 L55 30 L52 35 L58 40 L50 45 L53 40 L47 35 Z" fill="#ffc107" stroke="#ff6b35" stroke-width="1"/>
+  
+  <!-- Water drop -->
+  <path d="M25 25 C25 20, 30 15, 35 20 C35 25, 30 30, 25 25 Z" fill="#17a2b8" stroke="#0056b3" stroke-width="1"/>
+  
+  <!-- Company text -->
+  <text x="85" y="25" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">DISEÑO</text>
+  <text x="85" y="40" font-family="Arial, sans-serif" font-size="12" fill="#667eea">Sanitario</text>
+  <text x="85" y="55" font-family="Arial, sans-serif" font-size="12" fill="#667eea">Eléctrico</text>
+  <text x="85" y="70" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">Profesional</text>
+</svg>
