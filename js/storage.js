@@ -1,15 +1,27 @@
-// Sistema de almacenamiento local para facturas
+// Sistema de almacenamiento con base de datos PostgreSQL
 class InvoiceStorage {
   constructor() {
-    this.storageKey = 'invoices_db';
+    this.apiBase = '/api';
     this.userKey = 'current_user';
     this.init();
   }
 
   init() {
-    // Inicializar almacenamiento si no existe
-    if (!localStorage.getItem(this.storageKey)) {
-      localStorage.setItem(this.storageKey, JSON.stringify([]));
+    // Verificar conexión con la API
+    this.checkConnection();
+  }
+
+  // Verificar conexión con la API
+  async checkConnection() {
+    try {
+      const response = await fetch(`${this.apiBase}/stats`);
+      if (!response.ok) {
+        console.warn('API connection not available, using local storage fallback');
+        this.useFallback = true;
+      }
+    } catch (error) {
+      console.warn('API connection failed, using local storage fallback');
+      this.useFallback = true;
     }
   }
 
@@ -19,9 +31,38 @@ class InvoiceStorage {
   }
 
   // Guardar factura
-  saveInvoice(invoiceData) {
+  async saveInvoice(invoiceData) {
     try {
-      const invoices = this.getAllInvoices();
+      if (this.useFallback) {
+        return this.saveInvoiceLocal(invoiceData);
+      }
+
+      const response = await fetch(`${this.apiBase}/invoices`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(invoiceData)
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error saving invoice');
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error saving invoice:', error);
+      // Fallback a almacenamiento local si falla la API
+      return this.saveInvoiceLocal(invoiceData);
+    }
+  }
+
+  // Fallback para almacenamiento local
+  saveInvoiceLocal(invoiceData) {
+    try {
+      const invoices = this.getAllInvoicesLocal();
       const newInvoice = {
         id: this.generateId(),
         ...invoiceData,
@@ -30,33 +71,77 @@ class InvoiceStorage {
       };
       
       invoices.push(newInvoice);
-      localStorage.setItem(this.storageKey, JSON.stringify(invoices));
+      localStorage.setItem('invoices_db', JSON.stringify(invoices));
       
       return { success: true, invoice: newInvoice };
     } catch (error) {
-      console.error('Error saving invoice:', error);
+      console.error('Error saving invoice locally:', error);
       return { success: false, error: error.message };
     }
   }
 
   // Obtener todas las facturas
-  getAllInvoices() {
+  async getAllInvoices() {
     try {
-      const invoices = localStorage.getItem(this.storageKey);
-      return invoices ? JSON.parse(invoices) : [];
+      if (this.useFallback) {
+        return this.getAllInvoicesLocal();
+      }
+
+      const response = await fetch(`${this.apiBase}/invoices`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch invoices');
+      }
+
+      return await response.json();
     } catch (error) {
       console.error('Error getting invoices:', error);
+      // Fallback a almacenamiento local
+      return this.getAllInvoicesLocal();
+    }
+  }
+
+  // Fallback para obtener facturas locales
+  getAllInvoicesLocal() {
+    try {
+      const invoices = localStorage.getItem('invoices_db');
+      return invoices ? JSON.parse(invoices) : [];
+    } catch (error) {
+      console.error('Error getting local invoices:', error);
       return [];
     }
   }
 
   // Obtener factura por ID
-  getInvoiceById(id) {
+  async getInvoiceById(id) {
     try {
-      const invoices = this.getAllInvoices();
-      return invoices.find(invoice => invoice.id === id);
+      if (this.useFallback) {
+        return this.getInvoiceByIdLocal(id);
+      }
+
+      const response = await fetch(`${this.apiBase}/invoices/${id}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error('Failed to fetch invoice');
+      }
+
+      return await response.json();
     } catch (error) {
       console.error('Error getting invoice by ID:', error);
+      return this.getInvoiceByIdLocal(id);
+    }
+  }
+
+  // Fallback local para obtener factura por ID
+  getInvoiceByIdLocal(id) {
+    try {
+      const invoices = this.getAllInvoicesLocal();
+      return invoices.find(invoice => invoice.id === id) || null;
+    } catch (error) {
+      console.error('Error getting local invoice by ID:', error);
       return null;
     }
   }
@@ -87,24 +172,68 @@ class InvoiceStorage {
   }
 
   // Eliminar factura
-  deleteInvoice(id) {
+  async deleteInvoice(id) {
     try {
-      const invoices = this.getAllInvoices();
+      if (this.useFallback) {
+        return this.deleteInvoiceLocal(id);
+      }
+
+      const response = await fetch(`${this.apiBase}/invoices/${id}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error deleting invoice');
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error deleting invoice:', error);
+      return this.deleteInvoiceLocal(id);
+    }
+  }
+
+  // Fallback local para eliminar factura
+  deleteInvoiceLocal(id) {
+    try {
+      const invoices = this.getAllInvoicesLocal();
       const filteredInvoices = invoices.filter(invoice => invoice.id !== id);
       
-      localStorage.setItem(this.storageKey, JSON.stringify(filteredInvoices));
+      localStorage.setItem('invoices_db', JSON.stringify(filteredInvoices));
       
       return { success: true };
     } catch (error) {
-      console.error('Error deleting invoice:', error);
+      console.error('Error deleting local invoice:', error);
       return { success: false, error: error.message };
     }
   }
 
   // Buscar facturas
-  searchInvoices(query) {
+  async searchInvoices(query) {
     try {
-      const invoices = this.getAllInvoices();
+      if (this.useFallback) {
+        return this.searchInvoicesLocal(query);
+      }
+
+      const response = await fetch(`${this.apiBase}/search?q=${encodeURIComponent(query)}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to search invoices');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error searching invoices:', error);
+      return this.searchInvoicesLocal(query);
+    }
+  }
+
+  // Fallback local para buscar facturas
+  async searchInvoicesLocal(query) {
+    try {
+      const invoices = await this.getAllInvoicesLocal();
       const searchTerm = query.toLowerCase();
       
       return invoices.filter(invoice => 
@@ -113,15 +242,35 @@ class InvoiceStorage {
         invoice.email.toLowerCase().includes(searchTerm)
       );
     } catch (error) {
-      console.error('Error searching invoices:', error);
+      console.error('Error searching local invoices:', error);
       return [];
     }
   }
 
   // Obtener estadísticas
-  getStats() {
+  async getStats() {
     try {
-      const invoices = this.getAllInvoices();
+      if (this.useFallback) {
+        return this.getStatsLocal();
+      }
+
+      const response = await fetch(`${this.apiBase}/stats`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting stats:', error);
+      return this.getStatsLocal();
+    }
+  }
+
+  // Fallback local para estadísticas
+  async getStatsLocal() {
+    try {
+      const invoices = await this.getAllInvoicesLocal();
       const totalInvoices = invoices.length;
       const totalAmount = invoices.reduce((sum, invoice) => sum + invoice.total, 0);
       const avgAmount = totalInvoices > 0 ? totalAmount / totalInvoices : 0;
@@ -132,7 +281,7 @@ class InvoiceStorage {
         avgAmount
       };
     } catch (error) {
-      console.error('Error getting stats:', error);
+      console.error('Error getting local stats:', error);
       return { totalInvoices: 0, totalAmount: 0, avgAmount: 0 };
     }
   }

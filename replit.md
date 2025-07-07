@@ -12,11 +12,17 @@ This is a professional invoicing system designed for sanitary and electrical des
 - **Font Awesome 6.4.0**: For icons and visual elements
 - **Modular JavaScript**: Organized into separate modules for different functionalities
 
+### Backend Architecture
+- **Node.js API Server**: RESTful API with endpoints for invoice management
+- **PostgreSQL Database**: Persistent storage with Drizzle ORM
+- **Hybrid Storage System**: Database-first with local storage fallback
+- **Real-time Data Sync**: Automatic synchronization between client and server
+
 ### Client-Side Components
 - **Authentication System**: Simple login/logout with local storage
-- **Invoice Management**: Create, edit, and manage invoices
+- **Invoice Management**: Create, edit, and manage invoices with database persistence
 - **Export System**: PDF and Excel export capabilities
-- **Storage System**: Local storage-based data persistence
+- **Storage System**: Hybrid database + local storage system with automatic fallback
 
 ## Key Components
 
@@ -100,6 +106,13 @@ This is a professional invoicing system designed for sanitary and electrical des
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+
+- **July 07, 2025**: Added PostgreSQL database integration
+  - Created database schema with invoices, services, and users tables
+  - Implemented hybrid storage system with database-first approach
+  - Built RESTful API server with Node.js for invoice management
+  - Updated frontend to use async operations with automatic fallback to local storage
+  - Configured Drizzle ORM for type-safe database operations
 
 - **July 07, 2025**: Added logo functionality to PDF and Excel exports
   - Created professional SVG logo with building, electrical, and plumbing icons

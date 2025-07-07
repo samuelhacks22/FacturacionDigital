@@ -168,7 +168,7 @@ class InvoiceApp {
   }
 
   // Guardar factura
-  saveInvoice() {
+  async saveInvoice() {
     try {
       // Validar formulario
       const formData = this.getFormData();
@@ -177,12 +177,12 @@ class InvoiceApp {
       }
 
       // Guardar en almacenamiento
-      const result = invoiceStorage.saveInvoice(formData);
+      const result = await invoiceStorage.saveInvoice(formData);
       
       if (result.success) {
         this.showMessage('Factura guardada correctamente', 'success');
         this.clearForm();
-        this.loadInvoices();
+        await this.loadInvoices();
       } else {
         this.showMessage('Error al guardar la factura: ' + result.error, 'danger');
       }
@@ -321,9 +321,14 @@ class InvoiceApp {
   }
 
   // Cargar facturas
-  loadInvoices() {
-    const invoices = invoiceStorage.getAllInvoices();
-    this.displayInvoices(invoices);
+  async loadInvoices() {
+    try {
+      const invoices = await invoiceStorage.getAllInvoices();
+      this.displayInvoices(invoices);
+    } catch (error) {
+      console.error('Error loading invoices:', error);
+      this.showMessage('Error al cargar las facturas', 'danger');
+    }
   }
 
   // Mostrar facturas
@@ -364,12 +369,13 @@ class InvoiceApp {
   }
 
   // Ver factura
-  viewInvoice(id) {
-    const invoice = invoiceStorage.getInvoiceById(id);
-    if (!invoice) {
-      this.showMessage('Factura no encontrada', 'danger');
-      return;
-    }
+  async viewInvoice(id) {
+    try {
+      const invoice = await invoiceStorage.getInvoiceById(id);
+      if (!invoice) {
+        this.showMessage('Factura no encontrada', 'danger');
+        return;
+      }
 
     // Llenar formulario con datos de la factura
     document.getElementById('nombre').value = invoice.cliente;
@@ -423,20 +429,29 @@ class InvoiceApp {
       });
     }
 
-    this.calculateTotal();
-    this.showMessage('Factura cargada para edición', 'info');
+      this.calculateTotal();
+      this.showMessage('Factura cargada para edición', 'info');
+    } catch (error) {
+      console.error('Error viewing invoice:', error);
+      this.showMessage('Error al cargar la factura', 'danger');
+    }
   }
 
   // Eliminar factura
-  deleteInvoice(id) {
+  async deleteInvoice(id) {
     if (confirm('¿Está seguro de que desea eliminar esta factura?')) {
-      const result = invoiceStorage.deleteInvoice(id);
-      
-      if (result.success) {
-        this.showMessage('Factura eliminada correctamente', 'success');
-        this.loadInvoices();
-      } else {
-        this.showMessage('Error al eliminar la factura: ' + result.error, 'danger');
+      try {
+        const result = await invoiceStorage.deleteInvoice(id);
+        
+        if (result.success) {
+          this.showMessage('Factura eliminada correctamente', 'success');
+          await this.loadInvoices();
+        } else {
+          this.showMessage('Error al eliminar la factura: ' + result.error, 'danger');
+        }
+      } catch (error) {
+        console.error('Error deleting invoice:', error);
+        this.showMessage('Error al eliminar la factura', 'danger');
       }
     }
   }
@@ -445,14 +460,19 @@ class InvoiceApp {
   setupSearch() {
     const searchInput = document.getElementById('search-invoices');
     if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
+      searchInput.addEventListener('input', async (e) => {
         const query = e.target.value.trim();
         
-        if (query.length === 0) {
-          this.loadInvoices();
-        } else {
-          const filteredInvoices = invoiceStorage.searchInvoices(query);
-          this.displayInvoices(filteredInvoices);
+        try {
+          if (query.length === 0) {
+            await this.loadInvoices();
+          } else {
+            const filteredInvoices = await invoiceStorage.searchInvoices(query);
+            this.displayInvoices(filteredInvoices);
+          }
+        } catch (error) {
+          console.error('Error searching invoices:', error);
+          this.showMessage('Error al buscar facturas', 'danger');
         }
       });
     }
