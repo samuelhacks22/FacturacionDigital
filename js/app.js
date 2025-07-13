@@ -46,6 +46,14 @@ class InvoiceApp {
 
     // Eventos de cambio en servicios
     this.setupServiceEvents();
+
+    // Evento para ajuste de pago
+    const adjustmentInput = document.getElementById('adjustment-amount');
+    if (adjustmentInput) {
+      adjustmentInput.addEventListener('input', () => {
+        this.calculateTotal();
+      });
+    }
   }
 
   // Configurar eventos de servicios
@@ -62,12 +70,6 @@ class InvoiceApp {
           this.calculateTotal();
           this.updateDesignsDetailTable();
         }
-        const adjustmentInput = document.getElementById('adjustment-amount');
-  if (adjustmentInput) {
-    adjustmentInput.addEventListener('input', () => {
-      this.calculateTotal();
-    });
-  }
       });
     }
   }
@@ -167,43 +169,46 @@ class InvoiceApp {
     }
   }
 
- calculateTotal() {
-  const serviceItems = document.querySelectorAll('.service-item');
-  let total = 0;
+  // Calcular total (incluye ajuste)
+  calculateTotal() {
+    const serviceItems = document.querySelectorAll('.service-item');
+    let total = 0;
 
-  serviceItems.forEach(item => {
-    const area = parseFloat(item.querySelector('.service-area').value) || 0;
-    const price = parseFloat(item.querySelector('.service-price').value) || 0;
-    total += area * price;
-  });
+    serviceItems.forEach(item => {
+      const area = parseFloat(item.querySelector('.service-area').value) || 0;
+      const price = parseFloat(item.querySelector('.service-price').value) || 0;
+      total += area * price;
+    });
 
-  // Sumar ajuste de pago si existe
-  const adjustmentInput = document.getElementById('adjustment-amount');
-  let adjustment = 0;
-  if (adjustmentInput) {
-    adjustment = parseFloat(adjustmentInput.value) || 0;
-    total += adjustment;
+    // Sumar ajuste de pago si existe
+    const adjustmentInput = document.getElementById('adjustment-amount');
+    let adjustment = 0;
+    if (adjustmentInput) {
+      adjustment = parseFloat(adjustmentInput.value) || 0;
+      total += adjustment;
+    }
+
+    const totalElement = document.getElementById('total-amount');
+    if (totalElement) {
+      totalElement.textContent = total.toFixed(2);
+    }
+    this.updateDesignsDetailTable();
   }
 
-  const totalElement = document.getElementById('total-amount');
-  if (totalElement) {
-    totalElement.textContent = total.toFixed(2);
-  }
-  this.updateDesignsDetailTable();
-}
-
-  // NUEVA FUNCIÓN: Actualiza la tabla de detalle de diseños
+  // Actualiza la tabla de detalle de diseños
   updateDesignsDetailTable() {
     const tbody = document.getElementById('designs-detail-body');
     if (!tbody) return;
 
     const serviceItems = document.querySelectorAll('.service-item');
+    let rows = '';
+
     if (serviceItems.length === 0) {
       tbody.innerHTML = `<tr><td colspan="5" class="text-center">No hay servicios agregados</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = Array.from(serviceItems).map(item => {
+    rows = Array.from(serviceItems).map(item => {
       const tipo = item.querySelector('.service-type').selectedOptions[0].textContent;
       const nivel = item.querySelector('.service-level').selectedOptions[0].textContent;
       const area = parseFloat(item.querySelector('.service-area').value) || 0;
@@ -220,100 +225,26 @@ class InvoiceApp {
         </tr>
       `;
     }).join('');
-  }
 
-  // Configurar formulario
-  setupForm() {
-    // Establecer fecha de emisión como hoy
-    const fechaEmision = document.getElementById('fecha_emision');
-    if (fechaEmision) {
-      fechaEmision.value = new Date().toISOString().split('T')[0];
+    // Si hay ajuste, mostrarlo como fila aparte
+    const adjustmentInput = document.getElementById('adjustment-amount');
+    const adjustmentDesc = document.getElementById('adjustment-description');
+    let adjustment = 0;
+    if (adjustmentInput) {
+      adjustment = parseFloat(adjustmentInput.value) || 0;
+      if (adjustment !== 0) {
+        rows += `
+          <tr class="table-info">
+            <td colspan="3">${adjustmentDesc && adjustmentDesc.value ? adjustmentDesc.value : 'Ajuste de Pago'}</td>
+            <td class="fw-bold">RD$</td>
+            <td class="fw-bold">RD$ ${adjustment.toFixed(2)}</td>
+          </tr>
+        `;
+      }
     }
 
-    // Establecer fecha de vencimiento (30 días desde hoy)
-    const fechaVencimiento = document.getElementById('fecha_vencimiento');
-    if (fechaVencimiento) {
-      const vencimiento = new Date();
-      vencimiento.setDate(vencimiento.getDate() + 30);
-      fechaVencimiento.value = vencimiento.toISOString().split('T')[0];
-    }
-
-    // Calcular total inicial
-    this.calculateTotal();
+    tbody.innerHTML = rows;
   }
-
-  // Añadir servicio
-  addService() {
-    const servicesContainer = document.getElementById('services-container');
-    if (!servicesContainer) return;
-
-    const serviceDiv = document.createElement('div');
-    serviceDiv.className = 'service-item fade-in';
-    serviceDiv.innerHTML = `
-      <div class="row">
-        <div class="col-md-4">
-          <label class="form-label">Tipo de Servicio</label>
-          <select class="form-select service-type" autocomplete="off">
-            <option value="sanitario">Diseño Sanitario</option>
-            <option value="electrico">Diseño Eléctrico</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Nivel</label>
-          <select class="form-select service-level" autocomplete="off">
-            <option value="1">Primer Nivel</option>
-            <option value="2">Segundo Nivel</option>
-            <option value="3">Tercer Nivel</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">Área (m²)</label>
-          <input type="number" class="form-control service-area" placeholder="m²" 
-                 min="0" step="0.01" value="0.00" autocomplete="off">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Precio Unitario (RD$)</label>
-          <input type="number" class="form-control service-price" placeholder="RD$" 
-                 min="0" step="0.01" value="50.00" autocomplete="off">
-        </div>
-      </div>
-    `;
-
-    servicesContainer.appendChild(serviceDiv);
-    this.calculateTotal();
-  }
-
-  // Remover servicio
-  removeService() {
-    const servicesContainer = document.getElementById('services-container');
-    if (!servicesContainer) return;
-
-    const serviceItems = servicesContainer.querySelectorAll('.service-item');
-    if (serviceItems.length > 1) {
-      serviceItems[serviceItems.length - 1].remove();
-      this.calculateTotal();
-    } else {
-      this.showMessage('Debe mantener al menos un servicio', 'warning');
-    }
-  }
-
-  // Calcular total
-  calculateTotal() {
-    const serviceItems = document.querySelectorAll('.service-item');
-    let total = 0;
-
-    serviceItems.forEach(item => {
-      const area = parseFloat(item.querySelector('.service-area').value) || 0;
-      const price = parseFloat(item.querySelector('.service-price').value) || 0;
-      total += area * price;
-    });
-
-    const totalElement = document.getElementById('total-amount');
-    if (totalElement) {
-      totalElement.textContent = total.toFixed(2);
-    }
-  }
-
   // Guardar factura
   saveInvoice() {
     try {
