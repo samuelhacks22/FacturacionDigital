@@ -220,6 +220,22 @@
                           placeholder="Términos de pago y notas adicionales" autocomplete="off">El TRABAJO SE EMPEZARÁ A REALIZAR LUEGO DEL PAGO DEL 50%. EL PAGO DEL 50% RESTANTE SE REALIZARÁ EN CONTRA ENTREGA.</textarea>
               </div>
               
+              <div class="payment-adjustment mt-4">
+                <h5><i class="fas fa-adjust me-2"></i>Ajuste de Pago</h5>
+                <div class="row">
+                  <div class="col-md-8">
+                    <label for="adjustment-description" class="form-label">Descripción</label>
+                    <input type="text" class="form-control" id="adjustment-description" 
+                           placeholder="Ej: Descuento especial, Recargo por urgencia">
+                  </div>
+                  <div class="col-md-4">
+                    <label for="adjustment-amount" class="form-label">Monto (RD$)</label>
+                    <input type="number" class="form-control" id="adjustment-amount" 
+                           placeholder="0.00" step="0.01" value="0.00">
+                  </div>
+                </div>
+              </div>
+
               <div class="d-grid mt-4">
                 <button type="submit" class="btn btn-primary btn-lg">
                   <i class="fas fa-save me-2"></i>Guardar Factura
