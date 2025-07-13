@@ -183,6 +183,28 @@
                 </div>
               </div>
               <!-- Fin sección Detalle de Diseños/Servicios -->
+
+              <!-- Sección Ajuste de Pago -->
+              <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                  <h4><i class="fas fa-adjust me-2"></i>Ajuste de Pago</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row align-items-end">
+                    <div class="col-md-8">
+                      <label for="adjustment-description" class="form-label">Descripción</label>
+                      <input type="text" class="form-control" id="adjustment-description" 
+                             placeholder="Ej: Descuento especial, Recargo por urgencia">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="adjustment-amount" class="form-label">Monto (RD$)</label>
+                      <input type="number" class="form-control" id="adjustment-amount" 
+                             placeholder="0.00" step="0.01" value="0.00">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Fin sección Ajuste de Pago -->
               
               <div class="total-display">
                 <div class="row">
@@ -220,22 +242,6 @@
                           placeholder="Términos de pago y notas adicionales" autocomplete="off">El TRABAJO SE EMPEZARÁ A REALIZAR LUEGO DEL PAGO DEL 50%. EL PAGO DEL 50% RESTANTE SE REALIZARÁ EN CONTRA ENTREGA.</textarea>
               </div>
               
-              <div class="payment-adjustment mt-4">
-                <h5><i class="fas fa-adjust me-2"></i>Ajuste de Pago</h5>
-                <div class="row">
-                  <div class="col-md-8">
-                    <label for="adjustment-description" class="form-label">Descripción</label>
-                    <input type="text" class="form-control" id="adjustment-description" 
-                           placeholder="Ej: Descuento especial, Recargo por urgencia">
-                  </div>
-                  <div class="col-md-4">
-                    <label for="adjustment-amount" class="form-label">Monto (RD$)</label>
-                    <input type="number" class="form-control" id="adjustment-amount" 
-                           placeholder="0.00" step="0.01" value="0.00">
-                  </div>
-                </div>
-              </div>
-
               <div class="d-grid mt-4">
                 <button type="submit" class="btn btn-primary btn-lg">
                   <i class="fas fa-save me-2"></i>Guardar Factura
@@ -275,25 +281,7 @@
                 </tbody>
               </table>
             </div>
-            <div class="card mt-4">
-  <div class="card-header bg-info text-white">
-    <h4><i class="fas fa-adjust me-2"></i>Ajuste de Pago</h4>
-  </div>
-  <div class="card-body">
-    <div class="row align-items-end">
-      <div class="col-md-8">
-        <label for="adjustment-description" class="form-label">Descripción</label>
-        <input type="text" class="form-control" id="adjustment-description" 
-               placeholder="Ej: Descuento especial, Recargo por urgencia">
-      </div>
-      <div class="col-md-4">
-        <label for="adjustment-amount" class="form-label">Monto (RD$)</label>
-        <input type="number" class="form-control" id="adjustment-amount" 
-               placeholder="0.00" step="0.01" value="0.00">
-      </div>
-    </div>
-  </div>
-</div>
+            
             <div class="d-grid gap-2 mt-3">
               <button class="btn btn-success btn-export" id="export-excel">
                 <i class="fas fa-file-excel me-2"></i>Exportar a Excel
