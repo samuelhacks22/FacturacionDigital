@@ -54,6 +54,12 @@ class InvoiceApp {
         this.calculateTotal();
       });
     }
+    const adjustmentDesc = document.getElementById('adjustment-description');
+    if (adjustmentDesc) {
+      adjustmentDesc.addEventListener('input', () => {
+        this.updateDesignsDetailTable();
+      });
+    }
   }
 
   // Configurar eventos de servicios
@@ -245,6 +251,7 @@ class InvoiceApp {
 
     tbody.innerHTML = rows;
   }
+
   // Guardar factura
   saveInvoice() {
     try {
@@ -282,14 +289,22 @@ class InvoiceApp {
       const precio = parseFloat(item.querySelector('.service-price').value) || 0;
 
       servicios.push({
-        tipo: tipo === 'sanitario' ? 'Diseño Sanitario' : 'Diseño Eléctrico',
+        tipo: item.querySelector('.service-type').selectedOptions[0].textContent,
         nivel: parseInt(nivel),
         area: area,
         precio: precio
       });
     });
 
-    const total = servicios.reduce((sum, servicio) => sum + (servicio.area * servicio.precio), 0);
+    // Ajuste de pago
+    const adjustmentInput = document.getElementById('adjustment-amount');
+    const adjustmentDesc = document.getElementById('adjustment-description');
+    const adjustment = adjustmentInput ? parseFloat(adjustmentInput.value) || 0 : 0;
+    const adjustmentDescription = adjustmentDesc ? adjustmentDesc.value : '';
+
+    // Total incluyendo ajuste
+    const totalServicios = servicios.reduce((sum, servicio) => sum + (servicio.area * servicio.precio), 0);
+    const total = totalServicios + adjustment;
 
     return {
       cliente: document.getElementById('nombre').value,
@@ -299,6 +314,8 @@ class InvoiceApp {
       fechaEmision: document.getElementById('fecha_emision').value,
       fechaVencimiento: document.getElementById('fecha_vencimiento').value,
       servicios: servicios,
+      ajuste: adjustment,
+      ajusteDescripcion: adjustmentDescription,
       total: total,
       documentosRequeridos: document.getElementById('requirements').value,
       documentosEntregar: document.getElementById('deliverables').value,
@@ -459,6 +476,8 @@ class InvoiceApp {
     document.getElementById('requirements').value = invoice.documentosRequeridos;
     document.getElementById('deliverables').value = invoice.documentosEntregar;
     document.getElementById('notes').value = invoice.notas;
+    document.getElementById('adjustment-amount').value = invoice.ajuste !== undefined ? invoice.ajuste : 0;
+    document.getElementById('adjustment-description').value = invoice.ajusteDescripcion || '';
 
     // Recrear servicios
     const servicesContainer = document.getElementById('services-container');
@@ -473,6 +492,9 @@ class InvoiceApp {
             <div class="col-md-4">
               <label class="form-label">Tipo de Servicio</label>
               <select class="form-select service-type" autocomplete="off">
+                <option value="pluvial" ${servicio.tipo === 'Diseño Pluvial' ? 'selected' : ''}>Diseño Pluvial</option>
+                <option value="vial" ${servicio.tipo === 'Diseño Vial' ? 'selected' : ''}>Diseño Vial</option>
+                <option value="estructural" ${servicio.tipo === 'Diseño Estructural' ? 'selected' : ''}>Diseño Estructural</option>
                 <option value="sanitario" ${servicio.tipo === 'Diseño Sanitario' ? 'selected' : ''}>Diseño Sanitario</option>
                 <option value="electrico" ${servicio.tipo === 'Diseño Eléctrico' ? 'selected' : ''}>Diseño Eléctrico</option>
               </select>
@@ -501,7 +523,13 @@ class InvoiceApp {
       });
     }
 
-    this.calculateTotal();
+    // Mostrar el total guardado (incluyendo ajuste)
+    const totalElement = document.getElementById('total-amount');
+    if (totalElement) {
+      totalElement.textContent = invoice.total.toFixed(2);
+    }
+
+    this.updateDesignsDetailTable();
     this.showMessage('Factura cargada para edición', 'info');
   }
 
