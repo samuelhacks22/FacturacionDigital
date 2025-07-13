@@ -126,14 +126,38 @@ class InvoiceStorage {
       const totalAmount = invoices.reduce((sum, invoice) => sum + invoice.total, 0);
       const avgAmount = totalInvoices > 0 ? totalAmount / totalInvoices : 0;
       
+      // Estadísticas detalladas por servicio
+      const serviceStats = {};
+      invoices.forEach(invoice => {
+        invoice.servicios.forEach(servicio => {
+          const tipo = servicio.tipo;
+          if (!serviceStats[tipo]) {
+            serviceStats[tipo] = {
+              count: 0,
+              totalArea: 0,
+              totalRevenue: 0
+            };
+          }
+          serviceStats[tipo].count++;
+          serviceStats[tipo].totalArea += servicio.area;
+          serviceStats[tipo].totalRevenue += servicio.subtotal;
+        });
+      });
+      
       return {
         totalInvoices,
         totalAmount,
-        avgAmount
+        avgAmount,
+        serviceStats
       };
     } catch (error) {
       console.error('Error getting stats:', error);
-      return { totalInvoices: 0, totalAmount: 0, avgAmount: 0 };
+      return { 
+        totalInvoices: 0, 
+        totalAmount: 0, 
+        avgAmount: 0,
+        serviceStats: {}
+      };
     }
   }
 
@@ -163,6 +187,15 @@ class InvoiceStorage {
         throw new Error('Formato de datos inválido');
       }
       
+      // Validar estructura básica de las facturas
+      const isValid = data.invoices.every(invoice => 
+        invoice.id && invoice.cliente && invoice.servicios && Array.isArray(invoice.servicios)
+      );
+      
+      if (!isValid) {
+        throw new Error('Estructura de datos inválida');
+      }
+      
       localStorage.setItem(this.storageKey, JSON.stringify(data.invoices));
       
       return { success: true, imported: data.invoices.length };
@@ -182,6 +215,54 @@ class InvoiceStorage {
       console.error('Error clearing storage:', error);
       return { success: false, error: error.message };
     }
+  }
+
+  // Generar backup
+  backupData() {
+    try {
+      const data = this.exportData();
+      if (!data) throw new Error('No se pudo generar el backup');
+      
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup_facturas_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error creating backup:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Restaurar backup
+  restoreBackup(file) {
+    return new Promise((resolve, reject) => {
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const result = this.importData(e.target.result);
+            if (result.success) {
+              resolve(result);
+            } else {
+              reject(new Error(result.error || 'Error desconocido al importar'));
+            }
+          } catch (error) {
+            reject(error);
+          }
+        };
+        reader.readAsText(file);
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 }
 

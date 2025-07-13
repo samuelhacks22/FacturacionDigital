@@ -283,16 +283,21 @@ class InvoiceApp {
     const servicios = [];
 
     serviceItems.forEach(item => {
-      const tipo = item.querySelector('.service-type').value;
+      const tipoSelect = item.querySelector('.service-type');
+      const tipo = tipoSelect.selectedOptions[0].textContent;
+      const tipoValor = tipoSelect.value;
       const nivel = item.querySelector('.service-level').value;
       const area = parseFloat(item.querySelector('.service-area').value) || 0;
       const precio = parseFloat(item.querySelector('.service-price').value) || 0;
+      const subtotal = area * precio;
 
       servicios.push({
-        tipo: item.querySelector('.service-type').selectedOptions[0].textContent,
+        tipo: tipo,
+        tipoValor: tipoValor,
         nivel: parseInt(nivel),
         area: area,
-        precio: precio
+        precio: precio,
+        subtotal: subtotal
       });
     });
 
@@ -303,7 +308,7 @@ class InvoiceApp {
     const adjustmentDescription = adjustmentDesc ? adjustmentDesc.value : '';
 
     // Total incluyendo ajuste
-    const totalServicios = servicios.reduce((sum, servicio) => sum + (servicio.area * servicio.precio), 0);
+    const totalServicios = servicios.reduce((sum, servicio) => sum + servicio.subtotal, 0);
     const total = totalServicios + adjustment;
 
     return {
@@ -385,6 +390,9 @@ class InvoiceApp {
             <div class="col-md-4">
               <label class="form-label">Tipo de Servicio</label>
               <select class="form-select service-type" autocomplete="off">
+                <option value="pluvial">Diseño Pluvial</option>
+                <option value="vial">Diseño Vial</option>
+                <option value="estructural">Diseño Estructural</option>
                 <option value="sanitario">Diseño Sanitario</option>
                 <option value="electrico">Diseño Eléctrico</option>
               </select>
@@ -492,11 +500,11 @@ class InvoiceApp {
             <div class="col-md-4">
               <label class="form-label">Tipo de Servicio</label>
               <select class="form-select service-type" autocomplete="off">
-                <option value="pluvial" ${servicio.tipo === 'Diseño Pluvial' ? 'selected' : ''}>Diseño Pluvial</option>
-                <option value="vial" ${servicio.tipo === 'Diseño Vial' ? 'selected' : ''}>Diseño Vial</option>
-                <option value="estructural" ${servicio.tipo === 'Diseño Estructural' ? 'selected' : ''}>Diseño Estructural</option>
-                <option value="sanitario" ${servicio.tipo === 'Diseño Sanitario' ? 'selected' : ''}>Diseño Sanitario</option>
-                <option value="electrico" ${servicio.tipo === 'Diseño Eléctrico' ? 'selected' : ''}>Diseño Eléctrico</option>
+                <option value="pluvial" ${servicio.tipoValor === 'pluvial' ? 'selected' : ''}>Diseño Pluvial</option>
+                <option value="vial" ${servicio.tipoValor === 'vial' ? 'selected' : ''}>Diseño Vial</option>
+                <option value="estructural" ${servicio.tipoValor === 'estructural' ? 'selected' : ''}>Diseño Estructural</option>
+                <option value="sanitario" ${servicio.tipoValor === 'sanitario' ? 'selected' : ''}>Diseño Sanitario</option>
+                <option value="electrico" ${servicio.tipoValor === 'electrico' ? 'selected' : ''}>Diseño Eléctrico</option>
               </select>
             </div>
             <div class="col-md-3">
