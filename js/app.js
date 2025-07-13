@@ -62,6 +62,12 @@ class InvoiceApp {
           this.calculateTotal();
           this.updateDesignsDetailTable();
         }
+        const adjustmentInput = document.getElementById('adjustment-amount');
+  if (adjustmentInput) {
+    adjustmentInput.addEventListener('input', () => {
+      this.calculateTotal();
+    });
+  }
       });
     }
   }
@@ -161,23 +167,30 @@ class InvoiceApp {
     }
   }
 
-  // Calcular total
-  calculateTotal() {
-    const serviceItems = document.querySelectorAll('.service-item');
-    let total = 0;
+ calculateTotal() {
+  const serviceItems = document.querySelectorAll('.service-item');
+  let total = 0;
 
-    serviceItems.forEach(item => {
-      const area = parseFloat(item.querySelector('.service-area').value) || 0;
-      const price = parseFloat(item.querySelector('.service-price').value) || 0;
-      total += area * price;
-    });
+  serviceItems.forEach(item => {
+    const area = parseFloat(item.querySelector('.service-area').value) || 0;
+    const price = parseFloat(item.querySelector('.service-price').value) || 0;
+    total += area * price;
+  });
 
-    const totalElement = document.getElementById('total-amount');
-    if (totalElement) {
-      totalElement.textContent = total.toFixed(2);
-    }
-    this.updateDesignsDetailTable();
+  // Sumar ajuste de pago si existe
+  const adjustmentInput = document.getElementById('adjustment-amount');
+  let adjustment = 0;
+  if (adjustmentInput) {
+    adjustment = parseFloat(adjustmentInput.value) || 0;
+    total += adjustment;
   }
+
+  const totalElement = document.getElementById('total-amount');
+  if (totalElement) {
+    totalElement.textContent = total.toFixed(2);
+  }
+  this.updateDesignsDetailTable();
+}
 
   // NUEVA FUNCIÓN: Actualiza la tabla de detalle de diseños
   updateDesignsDetailTable() {

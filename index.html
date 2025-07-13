@@ -275,7 +275,25 @@
                 </tbody>
               </table>
             </div>
-            
+            <div class="card mt-4">
+  <div class="card-header bg-info text-white">
+    <h4><i class="fas fa-adjust me-2"></i>Ajuste de Pago</h4>
+  </div>
+  <div class="card-body">
+    <div class="row align-items-end">
+      <div class="col-md-8">
+        <label for="adjustment-description" class="form-label">Descripción</label>
+        <input type="text" class="form-control" id="adjustment-description" 
+               placeholder="Ej: Descuento especial, Recargo por urgencia">
+      </div>
+      <div class="col-md-4">
+        <label for="adjustment-amount" class="form-label">Monto (RD$)</label>
+        <input type="number" class="form-control" id="adjustment-amount" 
+               placeholder="0.00" step="0.01" value="0.00">
+      </div>
+    </div>
+  </div>
+</div>
             <div class="d-grid gap-2 mt-3">
               <button class="btn btn-success btn-export" id="export-excel">
                 <i class="fas fa-file-excel me-2"></i>Exportar a Excel
