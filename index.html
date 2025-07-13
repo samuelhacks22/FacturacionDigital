@@ -75,12 +75,12 @@
                 <div class="col-md-6">
                   <label for="nombre" class="form-label">Nombre del Cliente</label>
                   <input type="text" class="form-control" id="nombre" required 
-                         placeholder="Ingrese nombre completo" autocomplete="name">
+                      placeholder="Ingrese nombre completo" autocomplete="name">
                 </div>
                 <div class="col-md-6">
                   <label for="email" class="form-label">Correo Electrónico</label>
                   <input type="email" class="form-control" id="email" required 
-                         placeholder="ejemplo@empresa.com" autocomplete="email">
+                      placeholder="ejemplo@empresa.com" autocomplete="email">
                 </div>
               </div>
               
@@ -88,7 +88,7 @@
                 <div class="col-md-8">
                   <label for="proyecto" class="form-label">Nombre del Proyecto</label>
                   <input type="text" class="form-control" id="proyecto" required 
-                         placeholder="Ej: Centro Comercial XYZ" autocomplete="organization">
+                      placeholder="Ej: Centro Comercial XYZ" autocomplete="organization">
                 </div>
                 <div class="col-md-4">
                   <label for="niveles" class="form-label">Niveles</label>
@@ -120,6 +120,9 @@
                     <div class="col-md-4">
                       <label class="form-label">Tipo de Servicio</label>
                       <select class="form-select service-type" autocomplete="off">
+                        <option value="pluvial">Diseño Pluvial</option>
+                        <option value="vial">Diseño Vial</option>
+                        <option value="estructural">Diseño Estructural</option>
                         <option value="sanitario">Diseño Sanitario</option>
                         <option value="electrico">Diseño Eléctrico</option>
                       </select>
@@ -154,6 +157,32 @@
                   <i class="fas fa-minus-circle me-2"></i>Quitar Último
                 </button>
               </div>
+
+              <!-- Sección Detalle de Diseños/Servicios -->
+              <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                  <h4><i class="fas fa-list-alt me-2"></i>Detalle de Diseños</h4>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-bordered" id="designs-detail-table">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Tipo de Diseño</th>
+                          <th>Nivel</th>
+                          <th>Área (m²)</th>
+                          <th>Precio Unitario (RD$)</th>
+                          <th>Total (RD$)</th>
+                        </tr>
+                      </thead>
+                      <tbody id="designs-detail-body">
+                        <!-- Las filas se llenan dinámicamente con JS -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <!-- Fin sección Detalle de Diseños/Servicios -->
               
               <div class="total-display">
                 <div class="row">

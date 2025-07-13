@@ -60,6 +60,19 @@ class InvoiceApp {
       });
     }
   }
+ // Actualizar fecha actual
+  updateCurrentDate() {
+    const currentDateElement = document.getElementById('current-date');
+    if (currentDateElement) {
+      const now = new Date();
+      currentDateElement.textContent = now.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+  }
 
   // Actualizar fecha actual
   updateCurrentDate() {
