@@ -12,9 +12,9 @@ class InvoiceApp {
     this.setupForm();
     this.loadInvoices();
     this.setupSearch();
+    
     // Inicializar sistemas
     authSystem.setupAuthEvents();
-    this.updateDesignsDetailTable(); // Inicializa la tabla al cargar
   }
 
   // Configurar eventos
@@ -53,20 +53,14 @@ class InvoiceApp {
     const servicesContainer = document.getElementById('services-container');
     if (servicesContainer) {
       servicesContainer.addEventListener('input', (e) => {
-        if (
-          e.target.classList.contains('service-area') ||
-          e.target.classList.contains('service-price') ||
-          e.target.classList.contains('service-type') ||
-          e.target.classList.contains('service-level')
-        ) {
+        if (e.target.classList.contains('service-area') || 
+            e.target.classList.contains('service-price')) {
           this.calculateTotal();
-          this.updateDesignsDetailTable();
         }
       });
     }
   }
-
-  // Actualizar fecha actual
+ // Actualizar fecha actual
   updateCurrentDate() {
     const currentDateElement = document.getElementById('current-date');
     if (currentDateElement) {
@@ -79,6 +73,8 @@ class InvoiceApp {
       });
     }
   }
+
+
 
   // Configurar formulario
   setupForm() {
@@ -98,7 +94,6 @@ class InvoiceApp {
 
     // Calcular total inicial
     this.calculateTotal();
-    this.updateDesignsDetailTable();
   }
 
   // Añadir servicio
@@ -113,9 +108,6 @@ class InvoiceApp {
         <div class="col-md-4">
           <label class="form-label">Tipo de Servicio</label>
           <select class="form-select service-type" autocomplete="off">
-            <option value="pluvial">Diseño Pluvial</option>
-            <option value="vial">Diseño Vial</option>
-            <option value="estructural">Diseño Estructural</option>
             <option value="sanitario">Diseño Sanitario</option>
             <option value="electrico">Diseño Eléctrico</option>
           </select>
@@ -143,7 +135,6 @@ class InvoiceApp {
 
     servicesContainer.appendChild(serviceDiv);
     this.calculateTotal();
-    this.updateDesignsDetailTable();
   }
 
   // Remover servicio
@@ -155,7 +146,6 @@ class InvoiceApp {
     if (serviceItems.length > 1) {
       serviceItems[serviceItems.length - 1].remove();
       this.calculateTotal();
-      this.updateDesignsDetailTable();
     } else {
       this.showMessage('Debe mantener al menos un servicio', 'warning');
     }
@@ -176,38 +166,8 @@ class InvoiceApp {
     if (totalElement) {
       totalElement.textContent = total.toFixed(2);
     }
-    this.updateDesignsDetailTable();
   }
 
-  // NUEVA FUNCIÓN: Actualiza la tabla de detalle de diseños
-  updateDesignsDetailTable() {
-    const tbody = document.getElementById('designs-detail-body');
-    if (!tbody) return;
-
-    const serviceItems = document.querySelectorAll('.service-item');
-    if (serviceItems.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center">No hay servicios agregados</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = Array.from(serviceItems).map(item => {
-      const tipo = item.querySelector('.service-type').selectedOptions[0].textContent;
-      const nivel = item.querySelector('.service-level').selectedOptions[0].textContent;
-      const area = parseFloat(item.querySelector('.service-area').value) || 0;
-      const precio = parseFloat(item.querySelector('.service-price').value) || 0;
-      const total = area * precio;
-
-      return `
-        <tr>
-          <td>${tipo}</td>
-          <td>${nivel}</td>
-          <td>${area.toFixed(2)}</td>
-          <td>RD$ ${precio.toFixed(2)}</td>
-          <td>RD$ ${total.toFixed(2)}</td>
-        </tr>
-      `;
-    }).join('');
-  }
   // Guardar factura
   saveInvoice() {
     try {
